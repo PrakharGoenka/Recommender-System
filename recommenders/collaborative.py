@@ -12,6 +12,7 @@ class Collaborative():
     def __init__(self):
         pass
 
+
     def get_recommendation(self, user_id):
         '''
             Function to return 10 movie recommendations for the given user_id
@@ -30,6 +31,7 @@ class Collaborative():
 
         predicted.columns = ['movieId', 'predicted rating']
         return predicted[: 10]
+
 
     def get_trained_data(self):
         '''
@@ -89,7 +91,7 @@ class Collaborative():
         except EnvironmentError:
             # if error, generate, store and then return
             try:
-                m_u_raw = pd.read_csv('recommenders/csv/ratings.csv')
+                m_u_raw = pd.read_csv('recommenders/ml-1m/ratings.dat', sep = '::', engine = 'python')
                 m_u_train, m_u_test_list = train_test_split(m_u_raw, test_size = 0.2)
                 m_u_train = pd.pivot_table(m_u_train, values = 'rating', index = 'movieId', columns = 'userId')
                 m_u_test = pd.pivot_table(m_u_test_list, values = 'rating', index = 'movieId', columns = 'userId')
@@ -111,7 +113,6 @@ class Collaborative():
             except EnvironmentError:
                 print(EnvironmentError) 
                 return None      
-
 
 
     def get_rmse(self):
@@ -144,6 +145,7 @@ class Collaborative():
         rmse = (rmse/n)**(0.5)
 
         return rmse
+
 
     def get_mae(self):
         '''
@@ -179,3 +181,4 @@ class Collaborative():
 
 if __name__ == '__main__':
     pass
+    

@@ -12,6 +12,7 @@ class CollaborativeWB():
     def __init__(self):
         pass
 
+
     def get_recommendation(self, user_id):
         '''
             Function to return 10 movie recommendations for the given user_id
@@ -30,6 +31,7 @@ class CollaborativeWB():
 
         predicted.columns = ['movieId', 'predicted rating']
         return predicted[: 10]
+
 
     def get_trained_data(self):
         '''
@@ -61,11 +63,15 @@ class CollaborativeWB():
             similarity = pd.DataFrame(similarity, index = m_u_train.index, columns = m_u_train.index)
             np.fill_diagonal(similarity.values, 1)
 
+            # matrix to store sum of similarities
             sim_sum = (similarity.abs()).dot(pd.notna(m_u_train).astype('int'))
 
-            m_u_c = similarity.dot(m_u_c.fillna(0))
-            m_u_c = m_u_c.div(sim_sum).fillna(0)
+            # get baseline matrix
             baseline = self.get_baseline()
+
+            # calculate rating predictions matrix
+            m_u_c = similarity.dot(m_u_train.fillna(0).subtract(baseline))
+            m_u_c = m_u_c.div(sim_sum).fillna(0)
 
             m_u_c = m_u_c.add(baseline).clip(1, 5)
 
@@ -95,7 +101,7 @@ class CollaborativeWB():
         except EnvironmentError:
             # if error, generate, store and then return
             try:
-                m_u_raw = pd.read_csv('recommenders/csv/ratings.csv')
+                m_u_raw = pd.read_csv('recommenders/ml-1m/ratings.dat', sep = '::', engine = 'python')
                 m_u_train, m_u_test_list = train_test_split(m_u_raw, test_size = 0.2)
                 m_u_train = pd.pivot_table(m_u_train, values = 'rating', index = 'movieId', columns = 'userId')
                 m_u_test = pd.pivot_table(m_u_test_list, values = 'rating', index = 'movieId', columns = 'userId')
@@ -154,7 +160,6 @@ class CollaborativeWB():
                 print(EnvironmentError)
 
         return baseline
-
 
 
     def get_rmse(self):
@@ -224,7 +229,3 @@ class CollaborativeWB():
 
 if __name__ == '__main__':
     pass
-
-
-
-        
